@@ -1,4 +1,4 @@
-#include <stddef.h> // required for NULL
+#include <stddef.h> 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
