@@ -24,7 +24,7 @@ void set_table_print(struct set_table *table)
 }
 void free_set_table_entry(list_node_t *head)
 {
-    free(((key_data_t *)head->val)->key);
+    free((char *)((key_data_t *)head->val)->key);
     ((key_data_t *)head->val)->key = NULL;
     free((key_data_t *)head->val);
     head->val = NULL;
@@ -57,7 +57,7 @@ int set_table_remove(struct set_table *table, const char *key, const size_t key_
 }
 
 
-list_node_t *set_insert(struct set_table **table, char *key, const size_t key_len)
+list_node_t *set_insert(struct set_table **table, const char *key, const size_t key_len)
 {
     const list_node_t *is_node_already_in = set_table_search(*table, key, key_len);
     if (is_node_already_in)
@@ -79,7 +79,8 @@ list_node_t *set_insert(struct set_table **table, char *key, const size_t key_le
         (*table)->nodes[index]->val = key_data;
         key_data_t *entry = (*table)->nodes[index]->val;
         entry->key = malloc(key_len + 1);
-        strcpy_s(entry->key, key_len + 1, key);
+        memcpy((char *)entry->key,key,key_len+1);
+        // strcpy_s(((char *) (entry->key)), key_len + 1, key);
        
         entry->key_len = key_len;
         (*table)->nodes[index]->next = NULL;
@@ -95,7 +96,9 @@ list_node_t *set_insert(struct set_table **table, char *key, const size_t key_le
     new_item->val = key_data;
     key_data_t *entry = new_item->val;
     entry->key = malloc(key_len + 1);
-    strcpy_s(entry->key, key_len + 1, key);
+    memcpy((char *)entry->key,key,key_len+1);
+    // strcpy_s((char *)entry->key, key_len + 1, key);
+    
     entry->key_len = key_len;
     new_item->next = NULL;
     list_node_t *tail = head;
@@ -121,8 +124,13 @@ int main()
     const size_t hashmap_size = 1;
     struct set_table *table = set_table_new(hashmap_size);
     printf("-----START INSERT-----\n");
-    set_insert(&table, "HelloWorld!", 4);
-    set_insert(&table, "HelloWorld!", 4);
+    set_insert(&table, "HelloWorld!", 10);
+    set_insert(&table, "HelloWorld", 10);
+    set_insert(&table, "test", 3);
+    set_insert(&table, "test1", 5);
+    set_insert(&table, "test2", 5);
+    set_insert(&table, "test2", 5);
+    set_insert(&table, "test2", 5);
     set_insert(&table, "1", 1);
     set_insert(&table, "2", 1);
     set_insert(&table, "3", 1);

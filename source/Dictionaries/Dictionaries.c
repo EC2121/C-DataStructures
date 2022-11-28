@@ -10,7 +10,7 @@ typedef struct dictionary_entry
     void *entry_val;
 } dictionary_entry_t;
 
-list_node_t *dict_insert(set_table_t **dict, char *key, const size_t key_len, void *value, const size_t value_len)
+list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_len, void *value, const size_t value_len)
 {
     const list_node_t *is_node_already_in = set_table_search(*dict, key, key_len);
     if (is_node_already_in)
@@ -35,7 +35,8 @@ list_node_t *dict_insert(set_table_t **dict, char *key, const size_t key_len, vo
         key_data_t *entry_key_data = &entry->key_data;
 
         entry_key_data->key = malloc(key_len + 1);
-        strcpy_s(entry_key_data->key, key_len + 1, key);
+        memcpy((char *)entry_key_data->key,key,key_len + 1);
+        // strcpy_s(entry_key_data->key, key_len + 1, key);
         entry_key_data->key_len = key_len;
         entry->entry_val = malloc(value_len);
         memcpy(entry->entry_val, value, value_len);
@@ -58,7 +59,8 @@ list_node_t *dict_insert(set_table_t **dict, char *key, const size_t key_len, vo
     key_data_t *entry_key_data = &entry->key_data;
 
     entry_key_data->key = malloc(key_len + 1);
-    strcpy_s(entry_key_data->key, key_len + 1, key);
+    memcpy((char *)entry_key_data->key,key,key_len + 1);
+    // strcpy_s(entry_key_data->key, key_len + 1, key);
     entry_key_data->key_len = key_len;
     entry->entry_val = malloc(value_len);
     memcpy(entry->entry_val, value, value_len);
@@ -84,7 +86,7 @@ list_node_t *dict_insert(set_table_t **dict, char *key, const size_t key_len, vo
 
 void free_dict_entry(list_node_t *head)
 {
-    free(((key_data_t *)head->val)->key);
+    free((char *)((key_data_t *)head->val)->key);
     ((key_data_t *)head->val)->key = NULL;
     free(((dictionary_entry_t *)head->val)->entry_val);
     ((dictionary_entry_t *)head->val)->entry_val = NULL;
@@ -141,7 +143,7 @@ void print_dictionary(set_table_t *dict)
 
 int main()
 {
-    const size_t hashmap_size = 10;
+    const size_t hashmap_size = 1;
     int a = 1;
     int *b = &a;
     set_table_t *dict = set_table_new(hashmap_size);

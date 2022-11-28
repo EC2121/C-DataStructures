@@ -3,7 +3,7 @@
 
 typedef struct key_data
 {
-    char *key;
+    const char *key;
     size_t key_len;
 } key_data_t;
 
