@@ -24,7 +24,6 @@ void set_table_print(struct set_table *table)
 }
 void free_set_table_entry(list_node_t *head)
 {
-    free((char *)((key_data_t *)head->val)->key);
     ((key_data_t *)head->val)->key = NULL;
     free((key_data_t *)head->val);
     head->val = NULL;
@@ -78,8 +77,10 @@ list_node_t *set_insert(struct set_table **table, const char *key, const size_t 
         }
         (*table)->nodes[index]->val = key_data;
         key_data_t *entry = (*table)->nodes[index]->val;
-        entry->key = malloc(key_len + 1);
-        memcpy((char *)entry->key,key,key_len+1);
+
+        entry->key = key;
+        // entry->key = malloc(key_len + 1);
+        // memcpy((char *)entry->key,key,key_len+1);
         // strcpy_s(((char *) (entry->key)), key_len + 1, key);
        
         entry->key_len = key_len;
@@ -95,8 +96,9 @@ list_node_t *set_insert(struct set_table **table, const char *key, const size_t 
     }
     new_item->val = key_data;
     key_data_t *entry = new_item->val;
-    entry->key = malloc(key_len + 1);
-    memcpy((char *)entry->key,key,key_len+1);
+    entry->key = key;
+    // entry->key = malloc(key_len + 1);
+    // memcpy((char *)entry->key,key,key_len+1);
     // strcpy_s((char *)entry->key, key_len + 1, key);
     
     entry->key_len = key_len;
@@ -126,7 +128,7 @@ int main()
     printf("-----START INSERT-----\n");
     set_insert(&table, "HelloWorld!", 10);
     set_insert(&table, "HelloWorld", 10);
-    set_insert(&table, "test", 3);
+    set_insert(&table, "test", 4);
     set_insert(&table, "test1", 5);
     set_insert(&table, "test2", 5);
     set_insert(&table, "test2", 5);
@@ -143,7 +145,7 @@ int main()
     set_insert(&table, "0", 1);
     set_insert(&table, "0", 1);
     set_insert(&table, "0", 1);
-    set_table_remove(table,"ciao",4);
+    set_table_remove(table,"test",4);
     printf("HashmapSize = %llu\n",table->hashmap_size);
     printf("-----END INSERT-----\n");
     printf("-----SET TABLE PRINT START-----\n");

@@ -34,8 +34,9 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
         dictionary_entry_t *entry = (dictionary_entry_t *)(*dict)->nodes[index]->val;
         key_data_t *entry_key_data = &entry->key_data;
 
-        entry_key_data->key = malloc(key_len + 1);
-        memcpy((char *)entry_key_data->key,key,key_len + 1);
+        entry_key_data->key = key;
+        // entry_key_data->key = malloc(key_len + 1);
+        // memcpy((char *)entry_key_data->key,key,key_len + 1);
         // strcpy_s(entry_key_data->key, key_len + 1, key);
         entry_key_data->key_len = key_len;
         entry->entry_val = malloc(value_len);
@@ -57,9 +58,9 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
     new_item->val = dict_data;
     dictionary_entry_t *entry = (dictionary_entry_t *)new_item->val;
     key_data_t *entry_key_data = &entry->key_data;
-
-    entry_key_data->key = malloc(key_len + 1);
-    memcpy((char *)entry_key_data->key,key,key_len + 1);
+    entry->key_data.key = key;
+    // entry_key_data->key = malloc(key_len + 1);
+    // memcpy((char *)entry_key_data->key,key,key_len + 1);
     // strcpy_s(entry_key_data->key, key_len + 1, key);
     entry_key_data->key_len = key_len;
     entry->entry_val = malloc(value_len);
@@ -86,7 +87,7 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
 
 void free_dict_entry(list_node_t *head)
 {
-    free((char *)((key_data_t *)head->val)->key);
+
     ((key_data_t *)head->val)->key = NULL;
     free(((dictionary_entry_t *)head->val)->entry_val);
     ((dictionary_entry_t *)head->val)->entry_val = NULL;
@@ -148,7 +149,7 @@ int main()
     int *b = &a;
     set_table_t *dict = set_table_new(hashmap_size);
     printf("-----START INSERT-----\n");
-    //VALUE LEN HAS TO BE +1 FOR STRINGS.
+    // VALUE LEN HAS TO BE +1 FOR STRINGS.
     dict_insert(&dict, "ciao", 4, "TEST", 5);
     dict_insert(&dict, "1ciao", 5, "TEST", 5);
     dict_insert(&dict, "2ciao", 5, "TEST", 5);
@@ -179,10 +180,11 @@ int main()
     print_dictionary(dict);
     printf("-----PRINT END-----\n");
 
-     printf("-----DICT TABLE SEARCH START-----\n");
+    printf("-----DICT TABLE SEARCH START-----\n");
     list_node_t *result_node = set_table_search(dict, "ciao", 4);
-    if(result_node){
-        printf("%s WAS FOUND\n",((key_data_t *)result_node->val)->key);
+    if (result_node)
+    {
+        printf("%s WAS FOUND\n", ((key_data_t *)result_node->val)->key);
         result_node = result_node->next;
     }
     while (result_node)
@@ -191,5 +193,4 @@ int main()
         result_node = result_node->next;
     }
     printf("-----DICT TABLE SEARCH END-----\n");
-
 }
