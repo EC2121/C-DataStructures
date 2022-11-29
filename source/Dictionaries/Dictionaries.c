@@ -10,6 +10,25 @@ typedef struct dictionary_entry
     void *entry_val;
 } dictionary_entry_t;
 
+list_node_t* crate_dict_entry(const char *key, const size_t key_len, void *value, const size_t value_len)
+{
+    list_node_t *new_item = malloc(sizeof(list_node_t));
+    dictionary_entry_t *dict_data = calloc(1, sizeof(dictionary_entry_t));
+    if (!new_item || !dict_data)
+    {
+        printf("FAILED TO ALLOCATE MEMORY ON A DICT ENTRY");
+        return NULL;
+    }
+    new_item->val = dict_data;
+    dictionary_entry_t *entry = (dictionary_entry_t *)new_item->val;
+    key_data_t *entry_key_data = &entry->key_data;
+
+    entry_key_data->key = key;
+    entry_key_data->key_len = key_len;
+    entry->entry_val = malloc(value_len);
+    memcpy(entry->entry_val, value, value_len);
+    return new_item;
+}
 list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_len, void *value, const size_t value_len)
 {
     const list_node_t *is_node_already_in = set_table_search(*dict, key, key_len);
@@ -21,74 +40,36 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % (*dict)->hashmap_size;
     list_node_t *head = (*dict)->nodes[index];
+    list_node_t *cur_node = crate_dict_entry(key,key_len,value,value_len);
     if (!head)
-    {
-        (*dict)->nodes[index] = malloc(sizeof(list_node_t));
-        dictionary_entry_t *dict_data = calloc(1, sizeof(dictionary_entry_t));
-        if (!(*dict)->nodes[index] || !dict_data)
-        {
-            printf("FAILED TO ALLOCATE MEMORY ON HEAD ");
-            return NULL;
-        }
-        (*dict)->nodes[index]->val = dict_data;
-        dictionary_entry_t *entry = (dictionary_entry_t *)(*dict)->nodes[index]->val;
-        key_data_t *entry_key_data = &entry->key_data;
-
-        entry_key_data->key = key;
-        // entry_key_data->key = malloc(key_len + 1);
-        // memcpy((char *)entry_key_data->key,key,key_len + 1);
-        // strcpy_s(entry_key_data->key, key_len + 1, key);
-        entry_key_data->key_len = key_len;
-        entry->entry_val = malloc(value_len);
-        memcpy(entry->entry_val, value, value_len);
-
-        (*dict)->nodes[index]->next = NULL;
-        (*dict)->nodes[index]->prev = NULL;
-        return (*dict)->nodes[index];
+    {   
+        cur_node->next = NULL;
+        cur_node->prev =NULL;
+        (*dict)->nodes[index] = cur_node;
+        return cur_node;
     }
-
-    list_node_t *new_item = malloc(sizeof(list_node_t));
-    dictionary_entry_t *dict_data = calloc(1, sizeof(dictionary_entry_t));
-
-    if (!new_item || !dict_data)
-    {
-        printf("FAILED TO ALLOCATE MEMORY ON TAIL ");
-        return NULL;
-    }
-    new_item->val = dict_data;
-    dictionary_entry_t *entry = (dictionary_entry_t *)new_item->val;
-    key_data_t *entry_key_data = &entry->key_data;
-    entry->key_data.key = key;
-    // entry_key_data->key = malloc(key_len + 1);
-    // memcpy((char *)entry_key_data->key,key,key_len + 1);
-    // strcpy_s(entry_key_data->key, key_len + 1, key);
-    entry_key_data->key_len = key_len;
-    entry->entry_val = malloc(value_len);
-    memcpy(entry->entry_val, value, value_len);
-
-    new_item->next = NULL;
+    cur_node->next = NULL;
     list_node_t *tail = head;
     while (head)
     {
         tail = head;
         head = head->next;
     }
-    new_item->prev = tail;
-    tail->next = new_item;
+    cur_node->prev = tail;
+    tail->next = cur_node;
     (*dict)->collisions += 1;
     if ((*dict)->collisions > (*dict)->hashmap_size * 0.25f)
     {
-        printf("INSERTING %s CAUSED TOO MANY COLLISIONS REGENARTION NEEDED\n", entry_key_data->key);
+        printf("INSERTING %s CAUSED TOO MANY COLLISIONS REGENARTION NEEDED\n",((dictionary_entry_t *)cur_node->val)->key_data.key);
         (*dict) = set_table_regenerate(*dict);
     }
 
-    return new_item;
+    return cur_node;
 }
 
 void free_dict_entry(list_node_t *head)
 {
-
-    ((key_data_t *)head->val)->key = NULL;
+    ((dictionary_entry_t *)head->val)->key_data.key = NULL;
     free(((dictionary_entry_t *)head->val)->entry_val);
     ((dictionary_entry_t *)head->val)->entry_val = NULL;
     free((dictionary_entry_t *)head->val);
@@ -97,28 +78,14 @@ void free_dict_entry(list_node_t *head)
 
 int dict_remove(struct set_table *table, const char *key, const size_t key_len)
 {
-    list_node_t *head = set_table_search(table, key, key_len);
+    list_node_t *node = set_table_search(table, key, key_len);
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % table->hashmap_size;
-    if (!head)
+    if (list_remove_node(&table->nodes[index], node))
     {
-        return 0;
-    }
-
-    if (head->next)
-        head->next->prev = head->prev;
-
-    if (head->prev)
-    {
-        head->prev->next = head->next;
-    }
-    else
-    {
-        table->nodes[index] = head->next;
         table->collisions -= 1;
     }
-
-    free_dict_entry(head);
+    free_dict_entry(node);
     return 1;
 }
 

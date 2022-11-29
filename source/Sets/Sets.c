@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include "..\Includes\SetsInclude.h"
 
-
 void set_table_print(struct set_table *table)
-{   
+{
     int counter = 0;
     size_t table_size = table->hashmap_size;
     list_node_t *node;
@@ -20,41 +19,44 @@ void set_table_print(struct set_table *table)
         }
         counter++;
     }
-
 }
+
 void free_set_table_entry(list_node_t *head)
 {
     ((key_data_t *)head->val)->key = NULL;
     free((key_data_t *)head->val);
     head->val = NULL;
 }
-int set_table_remove(struct set_table *table, const char *key, const size_t key_len)
+
+int set_table_remove(set_table_t *table, const char *key, const size_t key_len)
 {
-    list_node_t *head = set_table_search(table, key, key_len);
+    list_node_t *node = set_table_search(table, key, key_len);
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % table->hashmap_size;
-    if (!head)
+    if (list_remove_node(&table->nodes[index], node))
     {
-        return 0;
-    }
-
-    if (head->next)
-        head->next->prev = head->prev;
-
-    if (head->prev)
-    {
-        head->prev->next = head->next;
-    }
-    else
-    {
-        table->nodes[index] = head->next;
         table->collisions -= 1;
     }
-
-    free_set_table_entry(head);
+    free_set_table_entry(node);
     return 1;
 }
 
+list_node_t *crate_table_entry(const char *key, const size_t key_len)
+{
+    list_node_t *new_item = malloc(sizeof(list_node_t));
+    key_data_t *key_data = calloc(1, sizeof(key_data_t));
+    if (!new_item || !key_data)
+    {
+        printf("FAILED TO ALLOCATE MEMORY ON INSERT");
+        return NULL;
+    }
+    new_item->val = key_data;
+    key_data_t *entry = new_item->val;
+    entry->key = key;
+    entry->key_len = key_len;
+
+    return new_item;
+}
 
 list_node_t *set_insert(struct set_table **table, const char *key, const size_t key_len)
 {
@@ -67,59 +69,25 @@ list_node_t *set_insert(struct set_table **table, const char *key, const size_t 
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % (*table)->hashmap_size;
     list_node_t *head = (*table)->nodes[index];
+    list_node_t *new_item = crate_table_entry(key,key_len);
     if (!head)
     {
-        (*table)->nodes[index] = malloc(sizeof(list_node_t));
-        key_data_t *key_data = calloc(1, sizeof(key_data_t));
-        if (!(*table)->nodes[index] || !key_data)
-        {
-            return NULL;
-        }
-        (*table)->nodes[index]->val = key_data;
-        key_data_t *entry = (*table)->nodes[index]->val;
-
-        entry->key = key;
-        // entry->key = malloc(key_len + 1);
-        // memcpy((char *)entry->key,key,key_len+1);
-        // strcpy_s(((char *) (entry->key)), key_len + 1, key);
-       
-        entry->key_len = key_len;
+        (*table)->nodes[index] = new_item;
         (*table)->nodes[index]->next = NULL;
         (*table)->nodes[index]->prev = NULL;
-        return (*table)->nodes[index];
+        return new_item;
     }
-    list_node_t *new_item = malloc(sizeof(list_node_t));
-    key_data_t *key_data = calloc(1, sizeof(key_data_t));
-    if (!new_item || !key_data)
-    {
-        return NULL;
-    }
-    new_item->val = key_data;
-    key_data_t *entry = new_item->val;
-    entry->key = key;
-    // entry->key = malloc(key_len + 1);
-    // memcpy((char *)entry->key,key,key_len+1);
-    // strcpy_s((char *)entry->key, key_len + 1, key);
-    
-    entry->key_len = key_len;
-    new_item->next = NULL;
-    list_node_t *tail = head;
-    while (head)
-    {
-        tail = head;
-        head = head->next;
-    }
-    new_item->prev = tail;
-    tail->next = new_item;
+
+    list_append(&head, new_item);
     (*table)->collisions += 1;
     if ((*table)->collisions > (*table)->hashmap_size * 0.25f)
-    {   
-        printf("INSERTING %s CAUSED TOO MANY COLLISIONS REGENARTION NEEDED\n",((key_data_t *)new_item->val)->key);
+    {
+        printf("INSERTING %s CAUSED TOO MANY COLLISIONS REGENARTION NEEDED\n", ((key_data_t *)new_item->val)->key);
         (*table) = set_table_regenerate(*table);
     }
+
     return new_item;
 }
-
 
 int main()
 {
@@ -130,6 +98,9 @@ int main()
     set_insert(&table, "HelloWorld", 10);
     set_insert(&table, "test", 4);
     set_insert(&table, "test1", 5);
+    set_insert(&table, "test2", 5);
+    set_insert(&table, "test2", 5);
+    set_insert(&table, "test2", 5);
     set_insert(&table, "test2", 5);
     set_insert(&table, "test2", 5);
     set_insert(&table, "test2", 5);
@@ -145,18 +116,20 @@ int main()
     set_insert(&table, "0", 1);
     set_insert(&table, "0", 1);
     set_insert(&table, "0", 1);
-    set_table_remove(table,"test",4);
-    printf("HashmapSize = %llu\n",table->hashmap_size);
+    set_table_remove(table, "test", 4);
+    set_table_remove(table, "test1", 5);
+    set_table_remove(table, "test2", 5);
+    printf("HashmapSize = %llu\n", table->hashmap_size);
     printf("-----END INSERT-----\n");
     printf("-----SET TABLE PRINT START-----\n");
     set_table_print(table);
     printf("-----SET TABLE PRINT END-----\n");
 
-    
     printf("-----SET TABLE SEARCH START-----\n");
-    list_node_t *result_node = set_table_search(table, "1", 1);
-    if(result_node){
-        printf("%s WAS FOUND\n",((key_data_t *)result_node->val)->key);
+    list_node_t *result_node = set_table_search(table, "HelloWorld", 10);
+    if (result_node)
+    {
+        printf("%s WAS FOUND\n", ((key_data_t *)result_node->val)->key);
         result_node = result_node->next;
     }
     while (result_node)
@@ -165,5 +138,4 @@ int main()
         result_node = result_node->next;
     }
     printf("-----SET TABLE SEARCH END-----\n");
-
 }

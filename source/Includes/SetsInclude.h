@@ -7,8 +7,6 @@ typedef struct key_data
     size_t key_len;
 } key_data_t;
 
-
-
 typedef struct set_table
 {
     list_node_t **nodes;
@@ -28,7 +26,7 @@ size_t djb33x_hash(const char *key, const size_t keylen)
 
 set_table_t *set_table_new(const size_t hashmap_size)
 {
-    struct set_table *table = malloc(sizeof(struct set_table));
+    set_table_t *table = malloc(sizeof(set_table_t));
     if (!table)
     {
         return NULL;
@@ -43,12 +41,12 @@ set_table_t *set_table_new(const size_t hashmap_size)
     return table;
 }
 
-list_node_t *set_table_search(struct set_table *table, const char *key, const size_t key_len)
+
+list_node_t *set_table_search(set_table_t *table, const char *key, const size_t key_len)
 {
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % table->hashmap_size;
     list_node_t *temp = table->nodes[index];
-    int counter = 0;
     while (temp)
     {
         if (!memcmp(((key_data_t *)temp->val)->key, key, strlen(key)))
@@ -56,13 +54,10 @@ list_node_t *set_table_search(struct set_table *table, const char *key, const si
             // printf("Search complexity : %d\n", counter);
             return temp;
         }
-        counter++;
         temp = temp->next;
     }
     return NULL;
 }
-
-
 
 
 
@@ -79,7 +74,7 @@ set_table_t *set_table_regenerate(set_table_t *table)
         while (node)
         {
             next_node = node->next;
-            size_t hash = djb33x_hash(((key_data_t*)node->val)->key, ((key_data_t *)node->val)->key_len);
+            size_t hash = djb33x_hash(((key_data_t *)node->val)->key, ((key_data_t *)node->val)->key_len);
             size_t index = hash % new_table->hashmap_size;
             list_node_t *head = new_table->nodes[index];
             if (!head)

@@ -29,35 +29,6 @@ int list_len(list_node_t **head)
     return counter;
 }
 
-list_node_t *list_get_tail(list_node_t **head)
-{
-    list_node_t *current_node = *head;
-    list_node_t *last_node = NULL;
-    while (current_node)
-    {
-        last_node = current_node;
-        current_node = current_node->next;
-    }
-    return last_node;
-}
-
-list_node_t *list_append(list_node_t **head, list_node_t *item)
-{
-    list_node_t *tail = list_get_tail(head);
-    if (!tail)
-    {
-        *head = item;
-        item->prev = NULL;
-    }
-    else
-    {
-        tail->next = item;
-        item->prev = tail;
-    }
-
-    item->next = NULL;
-    return item;
-}
 
 list_node_t *list_append_aftr_index(list_node_t **head, list_node_t *item, int index)
 {
@@ -90,6 +61,11 @@ list_node_t *list_append_aftr_index(list_node_t **head, list_node_t *item, int i
 
 list_node_t *list_append_befr_index(list_node_t **head, list_node_t *item, int index)
 {
+    if (index > list_len(head) || index < 0)
+    {
+        return NULL;
+    }
+
     if (index == 0)
     {
         item->next = *head;
@@ -99,10 +75,7 @@ list_node_t *list_append_befr_index(list_node_t **head, list_node_t *item, int i
         return item;
     }
 
-    if (index > list_len(head) || index < 0)
-    {
-        return item;
-    }
+
     int counter = 0;
     list_node_t *curr_node = *head;
     while (counter < index)
@@ -146,6 +119,7 @@ void free_linked_list_node(list_node_t *cur_head){
     free(cur_head);
     cur_head = NULL;
 }
+
 int list_remove_at(list_node_t **head, int index)
 {
     if (index < 0 || index >= list_len(head)) return 0;
@@ -157,6 +131,7 @@ int list_remove_at(list_node_t **head, int index)
         prev->next = NULL;
         prev->prev = NULL;
         free_linked_list_node(prev);
+        
         return 1;
     }
 
