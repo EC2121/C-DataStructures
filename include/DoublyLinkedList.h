@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "..\Includes\ListInclude.h"
+#include "ListInclude.h"
 #define list_append_str(list, str) list_append((struct list_node **)list, (struct list_node *)list_item_new(str))
 #define list_remove_at_index(list, index) list_remove_at((struct list_node **)list, index)
 #define list_reverse_def(list) list_reverse((struct list_node **)list)

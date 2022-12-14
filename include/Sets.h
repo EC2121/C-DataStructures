@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "..\Includes\SetsInclude.h"
+#include "SetsInclude.h"
 
 void set_table_print(struct set_table *table)
 {

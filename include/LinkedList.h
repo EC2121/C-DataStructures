@@ -1,4 +1,4 @@
-#include <stddef.h> 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,6 +20,10 @@ typedef struct list_item
 
 list_node_t *list_get_tail(list_node_t **head)
 {
+    if (head == NULL)
+    {
+        return NULL;
+    }
     list_node_t *current_node = *head;
     list_node_t *last_node = NULL;
     while (current_node)
@@ -32,6 +36,10 @@ list_node_t *list_get_tail(list_node_t **head)
 
 list_node_t *list_append(list_node_t **head, list_node_t *item)
 {
+    if (head == NULL)
+    {
+        return NULL;
+    }
     list_node_t *tail = list_get_tail(head);
     if (!tail)
     {
@@ -46,6 +54,10 @@ list_node_t *list_append(list_node_t **head, list_node_t *item)
 }
 list_node_t *list_pop(list_node_t **head)
 {
+    if (head == NULL)
+    {
+        return NULL;
+    }
     list_node_t *current_head = *head;
     if (!current_head)
     {
@@ -64,10 +76,9 @@ list_item_t *list_item_new_sizet(void *val)
         return NULL;
     }
     item->node.val = malloc(sizeof(val));
-    memcpy(item->node.val,val,sizeof(val));
+    memcpy(item->node.val, val, sizeof(val));
     return item;
 }
-
 
 list_item_t *list_item_new_str(char *val)
 {
@@ -101,11 +112,15 @@ void free_linked_list_node(list_node_t *cur_head)
     cur_head = NULL;
 }
 
-void list_remove_at(list_node_t **head, int index)
+list_node_t *list_remove_at(list_node_t **head, int index)
 {
+    if (head == NULL)
+    {
+        return NULL;
+    }
     if (index < 0 || index >= list_len(head))
     {
-        return;
+        return NULL;
     }
     list_node_t *prev = NULL;
     if (index == 0)
@@ -113,8 +128,8 @@ void list_remove_at(list_node_t **head, int index)
 
         prev = *head;
         *head = (*head)->next;
-        free_linked_list_node(prev);
-        return;
+        return prev;
+        // free_linked_list_node(prev);
     }
 
     int counter = 0;
@@ -127,11 +142,16 @@ void list_remove_at(list_node_t **head, int index)
     }
 
     prev->next = cur_head->next;
-    free_linked_list_node(cur_head);
+    return cur_head;
+    // free_linked_list_node(cur_head);
 }
 
 void lst_reverse(list_node_t **head)
 {
+    if (head == NULL)
+    {
+        return;
+    }
     list_node_t *curr_node = *head;
     list_node_t *prev_node = NULL;
     list_node_t *next_node = NULL;
