@@ -2,14 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#define list_append_str(list, str) list_append((list_node_t **)list, (list_node_t *)list_item_new(str))
+#define list_append_size_t(list, str) list_append((list_node_t **)list, (list_node_t *)list_item_new_sizet(str))
+#define list_append_str(list, str) list_append((list_node_t **)list, (list_node_t *)list_item_new_str(str))
 #define list_remove_at_index(list, index) list_remove_at((list_node_t **)list, index)
 #define list_reverse(list) lst_reverse((list_node_t **)list)
 
 typedef struct list_node
 {
     struct list_node *next;
-    char *val;
+    void *val;
 } list_node_t;
 
 typedef struct list_item
@@ -55,7 +56,20 @@ list_node_t *list_pop(list_node_t **head)
     return current_head;
 }
 
-list_item_t *list_item_new(char *val)
+list_item_t *list_item_new_sizet(void *val)
+{
+    list_item_t *item = malloc(sizeof(list_item_t));
+    if (!item)
+    {
+        return NULL;
+    }
+    item->node.val = malloc(sizeof(val));
+    memcpy(item->node.val,val,sizeof(val));
+    return item;
+}
+
+
+list_item_t *list_item_new_str(char *val)
 {
     list_item_t *item = malloc(sizeof(list_item_t));
     if (!item)
@@ -66,7 +80,6 @@ list_item_t *list_item_new(char *val)
     strcpy_s(item->node.val, strlen(val) + 1, val);
     return item;
 }
-
 int list_len(list_node_t **head)
 {
 
