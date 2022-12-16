@@ -36,10 +36,7 @@ list_node_t *list_get_tail(list_node_t **head)
 
 list_node_t *list_append(list_node_t **head, list_node_t *item)
 {
-    if (head == NULL)
-    {
-        return NULL;
-    }
+
     list_node_t *tail = list_get_tail(head);
     if (!tail)
     {
@@ -93,8 +90,11 @@ list_item_t *list_item_new_str(char *val)
 }
 int list_len(list_node_t **head)
 {
-
-    int counter = 0;
+    if(head == NULL)
+    {
+        return 0;
+    }
+    int counter = 1;
     list_node_t *cur_head = *head;
     while (cur_head)
     {

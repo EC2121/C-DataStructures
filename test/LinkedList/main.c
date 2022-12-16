@@ -1,7 +1,6 @@
 #include "LinkedList.h"
 #include "aiv-cunit.h"
 
-
 CUNIT_TEST(test_append_one_string)
 {
     list_item_t *my_linked_list = NULL;
@@ -87,12 +86,82 @@ CUNIT_TEST(test_remove_item_from_one_item_list)
     printf("%s---PASSED\n", __FUNCTION__);
 
 }
+CUNIT_TEST(test_get_tail_from_null_list)
+{
+    list_item_t *my_linked_list = NULL;
+    list_node_t *tail = list_get_tail((list_node_t**)&my_linked_list);
+    CUNIT_IS_NULL(tail);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
+
+CUNIT_TEST(test_get_tail_from_one_item_list)
+{
+    list_item_t *my_linked_list = NULL;
+    list_append_str(&my_linked_list, "item1");
+    list_node_t *tail = list_get_tail((list_node_t**)&my_linked_list);
+    CUNIT_STRING_EQ("item1",(char *)tail->val);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
+
+CUNIT_TEST(test_get_tail_from_two_item_list)
+{
+    list_item_t *my_linked_list = NULL;
+    list_append_str(&my_linked_list, "item1");
+    list_append_str(&my_linked_list, "item2");
+    list_node_t *tail = list_get_tail((list_node_t**)&my_linked_list);
+    CUNIT_STRING_EQ("item2",(char *)tail->val);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
+CUNIT_TEST(test_get_count_from_null_list)
+{
+    list_item_t *my_linked_list = NULL;
+    int count = list_len((list_node_t **)my_linked_list);
+    CUNIT_INT_EQ(0,count);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
+CUNIT_TEST(test_get_count_from_one_item_list)
+{
+    list_item_t *my_linked_list = NULL;
+    list_append_str(&my_linked_list, "item1");
+    int count = list_len((list_node_t **)my_linked_list);
+    CUNIT_INT_EQ(1,count);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
+
+CUNIT_TEST(test_get_count_from_two_item_list)
+{
+    list_item_t *my_linked_list = NULL;
+    list_append_str(&my_linked_list, "item1");
+    list_append_str(&my_linked_list, "item1");
+    int count = list_len((list_node_t **)my_linked_list);
+    CUNIT_INT_EQ(2,count);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
+
+CUNIT_TEST(test_get_count_from_one_hundred_item_list)
+{
+    list_item_t *my_linked_list = NULL;
+    for(int i = 0; i < 100; ++i){
+        list_append_str(&my_linked_list, "item1");
+    }
+    int count = list_len((list_node_t **)my_linked_list);
+    CUNIT_INT_EQ(100,count);
+    printf("%s---PASSED\n", __FUNCTION__);
+
+}
 
 CUNIT_RUNNER(
 
 test_append_one_string, test_append_two_string,
 test_pop_from_one_item_list, test_pop_from_empty_list, test_pop_from_two_items_list,
-test_remove_from_null_list,test_remove_unexistant_item_from_one_item_list,test_remove_item_from_one_item_list
-
+test_remove_from_null_list,test_remove_unexistant_item_from_one_item_list,test_remove_item_from_one_item_list,
+test_get_tail_from_null_list, test_get_tail_from_one_item_list,test_get_tail_from_two_item_list,
+test_get_count_from_null_list,test_get_count_from_one_item_list,test_get_count_from_two_item_list,test_get_count_from_one_hundred_item_list
 );
 
