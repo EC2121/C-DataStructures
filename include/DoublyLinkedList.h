@@ -3,24 +3,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "ListInclude.h"
-#define list_append_str(list, str) list_append((struct list_node **)list, (struct list_node *)list_item_new(str))
-#define list_remove_at_index(list, index) list_remove_at((struct list_node **)list, index)
-#define list_reverse_def(list) list_reverse((struct list_node **)list)
-#define list_append_after_index(list, item, index) list_append_aftr_index((struct list_node **)list, (struct list_node *)list_item_new(item), index)
-#define list_append_before_index(list, item, index) list_append_befr_index((struct list_node **)list, (struct list_node *)list_item_new(item), index)
-#define list_shuffle(list) list_shffle((struct list_node **)list)
+#include "DoublyLinkedListIncludes.h"
+#define DOUBLY_LINKED_LIST_APPEND_STR(list, str) doubly_linked_list_append((doubly_linked_list_node_t **)list, (doubly_linked_list_node_t *)doubly_linked_list_item_new(str))
+#define DOUBLY_LINKED_LIST_REMOVE_AT(list, index) doubly_linked_list_remove_at(doubly_linked_list_node_t**)list, index)
+#define DOUBLY_LINKED_doubly_linked_list_reverse(list) doubly_linked_list_reverse((doubly_linked_list_node_t**)list)
+#define DOUBLY_LINKED_LIST_APPEND_AFTER_INDEX(list, item, index) doubly_linked_list_append_after((doubly_linked_list_node_t **)list, (doubly_linked_list_node_t *)doubly_linked_list_item_new(item), index)
+#define DOUBLY_LINKED_LIST_APPEND_BEFORE_INDEX(list, item, index) doubly_linked_list_append_before((doubly_linked_list_node_t **)list, (doubly_linked_list_node_t *)doubly_linked_list_item_new(item), index)
+#define DOUBLY_LINKED_LIST_SHUFFLE(list) doubly_linked_list_shuffle((doubly_linked_list_node_t **)list)
 
-struct list_item
+struct doubly_linked_list_item
 {
-    struct list_node node;
+    doubly_linked_list_node_t node;
 };
 
-int list_len(list_node_t **head)
+int doubly_linked_list_len(doubly_linked_list_node_t **head)
 {
 
     int counter = 0;
-    list_node_t *cur_head = *head;
+    doubly_linked_list_node_t *cur_head = *head;
     while (cur_head)
     {
         cur_head = cur_head->next;
@@ -30,7 +30,7 @@ int list_len(list_node_t **head)
 }
 
 
-list_node_t *list_append_aftr_index(list_node_t **head, list_node_t *item, int index)
+doubly_linked_list_node_t *doubly_linked_list_append_after(doubly_linked_list_node_t **head, doubly_linked_list_node_t *item, int index)
 {
     if (index == 0)
     {
@@ -41,12 +41,12 @@ list_node_t *list_append_aftr_index(list_node_t **head, list_node_t *item, int i
         return item;
     }
 
-    if (index > list_len(head) || index < 0)
+    if (index > doubly_linked_list_len(head) || index < 0)
     {
         return item;
     }
     int counter = 0;
-    list_node_t *curr_node = *head;
+    doubly_linked_list_node_t *curr_node = *head;
     while (counter < index)
     {
         curr_node = curr_node->next;
@@ -59,9 +59,9 @@ list_node_t *list_append_aftr_index(list_node_t **head, list_node_t *item, int i
     return item;
 }
 
-list_node_t *list_append_befr_index(list_node_t **head, list_node_t *item, int index)
+doubly_linked_list_node_t *doubly_linked_list_append_before(doubly_linked_list_node_t **head, doubly_linked_list_node_t *item, int index)
 {
-    if (index > list_len(head) || index < 0)
+    if (index > doubly_linked_list_len(head) || index < 0)
     {
         return NULL;
     }
@@ -77,7 +77,7 @@ list_node_t *list_append_befr_index(list_node_t **head, list_node_t *item, int i
 
 
     int counter = 0;
-    list_node_t *curr_node = *head;
+    doubly_linked_list_node_t *curr_node = *head;
     while (counter < index)
     {
         curr_node = curr_node->next;
@@ -89,9 +89,9 @@ list_node_t *list_append_befr_index(list_node_t **head, list_node_t *item, int i
 
     return item;
 }
-list_node_t *list_pop(list_node_t **head)
+doubly_linked_list_node_t *doubly_linked_list_pop(doubly_linked_list_node_t **head)
 {
-    list_node_t *current_head = *head;
+    doubly_linked_list_node_t *current_head = *head;
     if (!current_head)
     {
         return NULL;
@@ -101,9 +101,9 @@ list_node_t *list_pop(list_node_t **head)
     return current_head;
 }
 
-struct list_item *list_item_new(const char *string)
+struct doubly_linked_list_item *doubly_linked_list_item_new(const char *string)
 {
-    struct list_item *item = malloc(sizeof(struct list_item));
+    struct doubly_linked_list_item *item = malloc(sizeof(struct doubly_linked_list_item));
     if (!item)
     {
         return NULL;
@@ -112,7 +112,7 @@ struct list_item *list_item_new(const char *string)
     strcpy_s(item->node.val, strlen(string) + 1, string);
     return item;
 }
-void free_linked_list_node(list_node_t *cur_head){
+void free_dobuly_linked_list_node(doubly_linked_list_node_t *cur_head){
     
     free(cur_head->val);
     cur_head->val = NULL;
@@ -120,23 +120,23 @@ void free_linked_list_node(list_node_t *cur_head){
     cur_head = NULL;
 }
 
-int list_remove_at(list_node_t **head, int index)
+int doubly_linked_list_remove(doubly_linked_list_node_t **head, int index)
 {
-    if (index < 0 || index >= list_len(head)) return 0;
-    list_node_t *prev = NULL;
+    if (index < 0 || index >= doubly_linked_list_len(head)) return 0;
+    doubly_linked_list_node_t *prev = NULL;
     if (index == 0)
     {
         prev = *head;
         *head = prev->next;
         prev->next = NULL;
         prev->prev = NULL;
-        free_linked_list_node(prev);
+        free_dobuly_linked_list_node(prev);
         
         return 1;
     }
 
     int counter = 0;
-    list_node_t *cur_node = *head;
+    doubly_linked_list_node_t *cur_node = *head;
     while (counter < index)
     {
         prev = cur_node;
@@ -148,15 +148,15 @@ int list_remove_at(list_node_t **head, int index)
 
 
     if (prev->next) prev->next->prev = prev;
-    free_linked_list_node(cur_node);
+    free_dobuly_linked_list_node(cur_node);
     return 1;
 }
 
-void list_reverse(list_node_t **head)
+void doubly_linked_list_reverse(doubly_linked_list_node_t **head)
 {
-    list_node_t *curr_node = *head;
-    list_node_t *prev_node = NULL;
-    list_node_t *next_node = NULL;
+    doubly_linked_list_node_t *curr_node = *head;
+    doubly_linked_list_node_t *prev_node = NULL;
+    doubly_linked_list_node_t *next_node = NULL;
     while (curr_node)
     {
         next_node = curr_node->next;
@@ -167,10 +167,10 @@ void list_reverse(list_node_t **head)
     *head = prev_node;
 }
 
-list_node_t *list_return_item_at_index(list_node_t **head, int index)
+doubly_linked_list_node_t *doubly_linked_list_return_item_at(doubly_linked_list_node_t **head, int index)
 {
-    if (index < 0 || index >= list_len(head)) return NULL;
-    list_node_t *prev = NULL;
+    if (index < 0 || index >= doubly_linked_list_len(head)) return NULL;
+    doubly_linked_list_node_t *prev = NULL;
     if (index == 0)
     {
         prev = *head;
@@ -181,7 +181,7 @@ list_node_t *list_return_item_at_index(list_node_t **head, int index)
     }
 
     int counter = 0;
-    list_node_t *cur_node = *head;
+    doubly_linked_list_node_t *cur_node = *head;
     while (counter < index)
     {
         prev = cur_node;
@@ -197,10 +197,10 @@ list_node_t *list_return_item_at_index(list_node_t **head, int index)
     return cur_node;
 }
 
-list_node_t *get_item_at_index(list_node_t **head, int index)
+doubly_linked_list_node_t *doubly_linked_list_remove_item_at(doubly_linked_list_node_t **head, int index)
 {
     int counter = 0;
-    list_node_t *cur_node = *head;
+    doubly_linked_list_node_t *cur_node = *head;
     while (counter < index)
     {
         cur_node = cur_node->next;
@@ -209,24 +209,24 @@ list_node_t *get_item_at_index(list_node_t **head, int index)
     return cur_node;
 }
 
-void list_shffle(list_node_t **head)
+void doubly_linked_list_shuffle(doubly_linked_list_node_t **head)
 {
 
     srand(time(NULL));
-    int list_length = list_len(head);
-    list_node_t *prev = NULL;
-    list_node_t *cur_node = list_return_item_at_index(head, rand() % list_length);
-    list_node_t *temp_head = cur_node;
-    list_length--;
+    int doubly_linked_list_length = doubly_linked_list_len(head);
+    doubly_linked_list_node_t *prev = NULL;
+    doubly_linked_list_node_t *cur_node = doubly_linked_list_return_item_at(head, rand() % doubly_linked_list_length);
+    doubly_linked_list_node_t *temp_head = cur_node;
+    doubly_linked_list_length--;
 
-    while (list_length)
+    while (doubly_linked_list_length)
     {
 
         cur_node->prev = prev;
-        cur_node->next = list_return_item_at_index(head, rand() % list_length);
+        cur_node->next = doubly_linked_list_return_item_at(head, rand() % doubly_linked_list_length);
         prev = cur_node;
         cur_node = cur_node->next;
-        list_length--;
+        doubly_linked_list_length--;
     }
 
     *head = temp_head;

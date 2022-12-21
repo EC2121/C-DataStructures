@@ -1,4 +1,5 @@
-#include "ListInclude.h"
+#pragma once
+#include "DoublyLinkedListIncludes.h"
 #include <stddef.h>
 
 typedef struct key_data
@@ -9,7 +10,7 @@ typedef struct key_data
 
 typedef struct set_table
 {
-    list_node_t **nodes;
+    doubly_linked_list_node_t **nodes;
     size_t hashmap_size;
     size_t collisions;
 } set_table_t;
@@ -32,7 +33,7 @@ set_table_t *set_table_new(const size_t hashmap_size)
         return NULL;
     }
     table->hashmap_size = hashmap_size;
-    table->nodes = calloc(table->hashmap_size, sizeof(list_node_t *));
+    table->nodes = calloc(table->hashmap_size, sizeof(doubly_linked_list_node_t *));
     if (!table->nodes)
     {
         free(table);
@@ -42,11 +43,11 @@ set_table_t *set_table_new(const size_t hashmap_size)
 }
 
 
-list_node_t *set_table_search(set_table_t *table, const char *key, const size_t key_len)
+doubly_linked_list_node_t *set_table_search(set_table_t *table, const char *key, const size_t key_len)
 {
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % table->hashmap_size;
-    list_node_t *temp = table->nodes[index];
+    doubly_linked_list_node_t *temp = table->nodes[index];
     while (temp)
     {
         if (!memcmp(((key_data_t *)temp->val)->key, key, strlen(key)))
@@ -66,8 +67,8 @@ set_table_t *set_table_regenerate(set_table_t *table)
     set_table_t *new_table = set_table_new(table->hashmap_size * 2);
     int counter = 0;
     size_t table_size = table->hashmap_size;
-    list_node_t *node;
-    list_node_t *next_node;
+    doubly_linked_list_node_t *node;
+    doubly_linked_list_node_t *next_node;
     while (counter < table_size)
     {
         node = table->nodes[counter];
@@ -76,7 +77,7 @@ set_table_t *set_table_regenerate(set_table_t *table)
             next_node = node->next;
             size_t hash = djb33x_hash(((key_data_t *)node->val)->key, ((key_data_t *)node->val)->key_len);
             size_t index = hash % new_table->hashmap_size;
-            list_node_t *head = new_table->nodes[index];
+            doubly_linked_list_node_t *head = new_table->nodes[index];
             if (!head)
             {
                 node->next = NULL;
@@ -85,7 +86,7 @@ set_table_t *set_table_regenerate(set_table_t *table)
             }
             else
             {
-                list_node_t *tail = head;
+                doubly_linked_list_node_t *tail = head;
                 while (head)
                 {
                     tail = head;

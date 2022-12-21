@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "..\Includes\SetsInclude.h"
+#include "SetsInclude.h"
 
 typedef struct dictionary_entry
 {
@@ -10,9 +10,9 @@ typedef struct dictionary_entry
     void *entry_val;
 } dictionary_entry_t;
 
-list_node_t* crate_dict_entry(const char *key, const size_t key_len, void *value, const size_t value_len)
+doubly_linked_list_node_t* crate_dict_entry(const char *key, const size_t key_len, void *value, const size_t value_len)
 {
-    list_node_t *new_item = malloc(sizeof(list_node_t));
+    doubly_linked_list_node_t *new_item = malloc(sizeof(doubly_linked_list_node_t));
     dictionary_entry_t *dict_data = calloc(1, sizeof(dictionary_entry_t));
     if (!new_item || !dict_data)
     {
@@ -29,9 +29,9 @@ list_node_t* crate_dict_entry(const char *key, const size_t key_len, void *value
     memcpy(entry->entry_val, value, value_len);
     return new_item;
 }
-list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_len, void *value, const size_t value_len)
+doubly_linked_list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_len, void *value, const size_t value_len)
 {
-    const list_node_t *is_node_already_in = set_table_search(*dict, key, key_len);
+    const doubly_linked_list_node_t *is_node_already_in = set_table_search(*dict, key, key_len);
     if (is_node_already_in)
     {
         printf("%s IS ALREADY A KEY\n", (char *)key);
@@ -39,8 +39,8 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
     }
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % (*dict)->hashmap_size;
-    list_node_t *head = (*dict)->nodes[index];
-    list_node_t *cur_node = crate_dict_entry(key,key_len,value,value_len);
+    doubly_linked_list_node_t *head = (*dict)->nodes[index];
+    doubly_linked_list_node_t *cur_node = crate_dict_entry(key,key_len,value,value_len);
     if (!head)
     {   
         cur_node->next = NULL;
@@ -49,7 +49,7 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
         return cur_node;
     }
     cur_node->next = NULL;
-    list_node_t *tail = head;
+    doubly_linked_list_node_t *tail = head;
     while (head)
     {
         tail = head;
@@ -67,7 +67,7 @@ list_node_t *dict_insert(set_table_t **dict, const char *key, const size_t key_l
     return cur_node;
 }
 
-void free_dict_entry(list_node_t *head)
+void free_dict_entry(doubly_linked_list_node_t *head)
 {
     ((dictionary_entry_t *)head->val)->key_data.key = NULL;
     free(((dictionary_entry_t *)head->val)->entry_val);
@@ -78,10 +78,10 @@ void free_dict_entry(list_node_t *head)
 
 int dict_remove(struct set_table *table, const char *key, const size_t key_len)
 {
-    list_node_t *node = set_table_search(table, key, key_len);
+    doubly_linked_list_node_t *node = set_table_search(table, key, key_len);
     size_t hash = djb33x_hash(key, key_len);
     size_t index = hash % table->hashmap_size;
-    if (list_remove_node(&table->nodes[index], node))
+    if (doubly_linked_list_remove_node(&table->nodes[index], node))
     {
         table->collisions -= 1;
     }
@@ -93,7 +93,7 @@ void print_dictionary(set_table_t *dict)
 {
     int counter = 0;
     size_t table_size = dict->hashmap_size;
-    list_node_t *node;
+    doubly_linked_list_node_t *node;
     while (counter < table_size)
     {
         node = dict->nodes[counter];
